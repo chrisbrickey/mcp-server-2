@@ -14,4 +14,7 @@ env/
 # macOS
 .DS_Store
 
+# secrets
+.env
+
 # Note: uv.lock should be committed for reproducible builds

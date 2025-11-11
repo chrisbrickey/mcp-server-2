@@ -1,9 +1,11 @@
 # mcp-server-2
 
-A simple python package containing a Model Context Protocol (MCP) server that provides utilities to agents.
-I'm using this repo to learn about MCP server implementation.
+A simple python package containing a Model Context Protocol (MCP) server that provides entertainment recommender utilities to agents. 
+This server integrates with [TMDB](www.themoviedb.org), a free and community-driven database of entertainment content.
 
 ## Dependencies
+
+### Tech Stack
 - **Python 3.12** 
 - **FastMCP >=2.13.0** - MCP server framework; requires Python 3.10+
 - **uv** -  package manager; [installation instructions](https://github.com/astral-sh/uv#installation)
@@ -12,12 +14,18 @@ I'm using this repo to learn about MCP server implementation.
 _This project uses the **FastMCP** framework, which requires less boilerplate than other frameworks (e.g., MCP Python SDK)._
 _See [mcp-server-1](https://github.com/chrisbrickey/mcp-server-1) for examples where functionality is more explicit._
 
+
+### Dependencies for recommender tooling
+- **httpx** - for API calls to TMDB
+- **python-dotenv** - for API key management
+
+
 ## Features
 
 ### Tools
 These tools are callable actions, analogous to POST requests. An agent executes these operations which may have side effects.
 Tools are annotated with `@mcp.tool()` in the FastMCP framework.
-- Tools will be added in the future.
+- **list_genres** - Fetches all entertainment genres from TMDB API for movies and TV shows, returning a unified map showing which media types support each genre
 
 ### Resources
 These resources provide read-only data, analogous to GET requests. An agent reads the information but does not performa actions. 
@@ -57,7 +65,8 @@ src/mcp_server_2/          # python package
 
 ## Setup
 
-```bash
+1. Create local development environment
+```
 # Clone the repository
 git clone <repository-url>
 cd mcp-server-2
@@ -65,6 +74,13 @@ cd mcp-server-2
 # Install dependencies (uv will create a virtual environment automatically)
 uv sync
 ```
+
+2. Add TMDB api key as environment variable
+- Get a free API key at [TMDB](www.themoviedb.org) by creating an account, going to account settings, and navigating to the API section.
+- Create a file called `.env` at the top level of the project. (This file is gitignored to prevent committing secrets.)
+- Copy the content of `.env.example` to your new file.
+- Replace `your_tmdb_api_key_here` in .env with the actual TMDB API key.
+
 
 ## Development
 
@@ -87,6 +103,14 @@ Running it directly would break the module resolution._
 ### Inspect using MCP Inspector (web ui)
 ```
   npx @modelcontextprotocol/inspector uv --directory /ABSOLUTE/PATH/TO/PROJECT run python src/mcp_server_2/server.py
+```
+
+### Run tests
+```
+uv run pytest
+
+# alternative to printout test names for quicker debugging
+uv run pytest -v
 ```
 
 ## Interacting with the MCP Server
@@ -152,7 +176,5 @@ _Replace `/ABSOLUTE/PATH/TO/PROJECT` with the actual path to the project directo
 7. The agent incorporates the results into its response to you
 
 ## Future Development
-
-- Add testing infrastructure
-- Add more useful resources and tools
+- Add alternative media types (e.g. podcasts)
 - Add helper agents and coordinate their activity
