@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-server-2"
+version = "0.1.0"
+description = "mcp-server-2"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Chris Brickey", email = "chrisbrickey@example.com"}
+]
+dependencies = [
+    "fastmcp>=2.13.0",
+]
+
+[project.scripts]
+mcp-server-2 = "mcp_server_2.server:main"
+
+[tool.uv]
+dev-dependencies = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_server_2"]

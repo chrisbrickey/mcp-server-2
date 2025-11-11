@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.claude/
+
+# macOS
+.DS_Store
+
+# Note: uv.lock should be committed for reproducible builds
