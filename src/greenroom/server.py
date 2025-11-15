@@ -26,7 +26,7 @@ class TMDBGenre(BaseModel):
 
 
 # Create FastMCP instance
-mcp = FastMCP("mcp-server-2")
+mcp = FastMCP("greenroom")
 
 @mcp.resource("config://version")
 def get_version() -> str:
