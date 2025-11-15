@@ -1,6 +1,6 @@
-# mcp-server-2
+# greenroom
 
-A simple python package (`greenroom`) containing a Model Context Protocol (MCP) server that provides entertainment recommender utilities to agents. 
+A simple python package containing an MCP (Model Context Protocol) server that provides entertainment recommender utilities to agents. 
 This server integrates with [TMDB](www.themoviedb.org), a free and community-driven database of entertainment content.
 
 ## Dependencies
@@ -36,7 +36,7 @@ Resources are annotated with `@mcp.resource()` in the FastMCP framework.
 This project follows the modern Python src/ layout to support convenient packaging and testing.
 
 ```
-mcp-server-2/               # project root
+greenroom/                  # project root
 ├── src/
 │   └── greenroom/          # python package
 │       ├── __init__.py
@@ -69,7 +69,7 @@ src/greenroom/          # python package
 ```
 # Clone the repository
 git clone <repository-url>
-cd mcp-server-2
+cd greenroom
 
 # Install dependencies (uv will create a virtual environment automatically)
 uv sync
@@ -107,10 +107,10 @@ Running it directly would break the module resolution._
 
 ### Run tests
 ```
-uv run pytest
+uv run python -m pytest
 
 # alternative to printout test names for quicker debugging
-uv run pytest -v
+uv run python -m pytest -v
 ```
 
 ## Interacting with the MCP Server
