@@ -4,7 +4,7 @@ import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
-from mcp_server_2.server import fetch_genres
+from greenroom.server import fetch_genres
 
 
 def test_fetch_genres_combines_media_types(monkeypatch, httpx_mock: HTTPXMock):

@@ -1,6 +1,6 @@
 # mcp-server-2
 
-A simple python package containing a Model Context Protocol (MCP) server that provides entertainment recommender utilities to agents. 
+A simple python package (`greenroom`) containing a Model Context Protocol (MCP) server that provides entertainment recommender utilities to agents. 
 This server integrates with [TMDB](www.themoviedb.org), a free and community-driven database of entertainment content.
 
 ## Dependencies
@@ -36,30 +36,30 @@ Resources are annotated with `@mcp.resource()` in the FastMCP framework.
 This project follows the modern Python src/ layout to support convenient packaging and testing.
 
 ```
-mcp-server-2/
+mcp-server-2/               # project root
 ├── src/
-│   └── mcp_server_2/          # python package
+│   └── greenroom/          # python package
 │       ├── __init__.py
-│       └── server.py          # primary entry point to server
-├── pyproject.toml             # configuration and dependencies
-├── uv.lock                    # dependency lock file (auto-generated)
+│       └── server.py       # primary entry point to server
+├── pyproject.toml          # configuration and dependencies
+├── uv.lock                 # dependency lock file (auto-generated)
 ├── .python-version            
 ├── .gitignore
 └── README.md
 ```
 
 ### Growing This Project
-As the server becomes more complex, new files will be added to the package (`src/mcp_server_2/`).
+As the server becomes more complex, new files will be added to the package (`src/greenroom/`).
 
 ```
-src/mcp_server_2/          # python package
+src/greenroom/          # python package
 ├── __init__.py
-├── server.py              # primary entry point to server
-├── tools/                 # tools organized into modules
+├── server.py           # primary entry point to server
+├── tools/              # tools organized into modules
 │   ├── __init__.py
 │   ├── math_tools.py
 │   └── data_tools.py
-└── utils.py               # shared utilities
+└── utils.py            # shared utilities
 ```
 
 
@@ -89,12 +89,12 @@ The server will start and communicate via stdio (standard input/output), which i
 
 ```
 # best approach uses the MCP entry point
-uv run mcp-server-2
+uv run greenroom
 ```
 
 ```
 # alternative: via python
-uv run python src/mcp_server_2/server.py
+uv run python src/greenroom/server.py
 ```
 
 _NB: You should not run the server directly (e.g. `uv run <path to server.py>`) because the server is part of a python package.
@@ -102,7 +102,7 @@ Running it directly would break the module resolution._
 
 ### Inspect using MCP Inspector (web ui)
 ```
-  npx @modelcontextprotocol/inspector uv --directory /ABSOLUTE/PATH/TO/PROJECT run python src/mcp_server_2/server.py
+  npx @modelcontextprotocol/inspector uv --directory /ABSOLUTE/PATH/TO/PROJECT run python src/greenroom/server.py
 ```
 
 ### Run tests
@@ -122,48 +122,49 @@ FastMCP server already uses.
 
 1. Run the setup command
 ```
-  claude mcp add --transport stdio mcp-server-2 uv -- --directory /ABSOLUTE/PATH/TO/PROJECT run python src/mcp_server_2/server.py
+  # Updates local claude settings and runs the MCP server
+  claude mcp add --transport stdio greenroom uv -- --directory /ABSOLUTE/PATH/TO/PROJECT run python src/greenroom/server.py
 ```
 
 2. Open claude code
-- Enter `/mcp` to view available MCP servers. Confirm that mcp-server-2 is one of them.
+- Enter `/mcp` to view available MCP servers. Confirm that greenroom is one of them.
 
 3. Exercise the server
 - Resources can be referenced with @ mentions
 - Tools will automatically be used during the conversation
-- Prompts show up as / slash commands 
-- To explicitly test a tool, ask claude to call the tool. e.g. `Call the <name-of-tool> tool from the MCP server called mcp-server-2.`
+- Prompts show up as / slash commands
+- To explicitly test a tool, ask claude to call the tool. e.g. `Call the <name-of-tool> tool from the MCP server called greenroom.`
 
-_When you update the methods on the MCP server, you must rerun all of these steps in order for the updates to be available to the claude session._
+When you update the methods on the MCP server, you must rerun all of the above steps in order for the updates to be available to the claude session.
 
+#### Claude code troubleshooting
+When you run the set up command (`claude mcp add`), a configuration for that MCP server is added to your local claude settings. 
+On my local machine, mcp configurations are stored at `/Users/$USER_NAME/.claude.json`.
 
-### Alternative: via Claude Desktop 
-
-1. Download [Claude Desktop](https://www.claude.com/download)
-_Make sure you download the actual native desktop client - not the wrapper on the web client._
-
-2. Add the server to the Claude Desktop configuration file (`claude_desktop_config.json`).
-_If this file does not already exist, create it here: *macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`._
-
+Manual configuration of the MCP server in claude settings:
 ```json
+# Replace /ABSOLUTE/PATH/TO/PROJECT with the actual path to the project directory (not the package directory).
 {
   "mcpServers": {
-    "mcp-server-2": {
+    "greenroom": {
       "command": "uv",
       "args": [
         "--directory",
         "/ABSOLUTE/PATH/TO/PROJECT",
         "run",
         "python",
-        "src/mcp_server_2/server.py"
+        "src/greenroom/server.py"
       ]
     }
   }
 }
 ```
-_Replace `/ABSOLUTE/PATH/TO/PROJECT` with the actual path to the project directory (not the package directory)._
 
-3. Restart Claude Desktop.
+Remove the server from claude settings on local machine.
+This might be useful if the configuration is not correct. Removing the server and then re-adding the server might be good way to resolve configuration issues.
+```
+  claude mcp remove greenroom
+```
 
 ## How It Works
 
