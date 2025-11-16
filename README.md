@@ -3,23 +3,6 @@
 A simple python package containing an MCP (Model Context Protocol) server that provides entertainment recommender utilities to agents. 
 This server integrates with [TMDB](www.themoviedb.org), a free and community-driven database of entertainment content.
 
-## Dependencies
-
-### Tech Stack
-- **Python 3.12** 
-- **FastMCP >=2.13.0** - MCP server framework; requires Python 3.10+
-- **uv** -  package manager; [installation instructions](https://github.com/astral-sh/uv#installation)
-- **Hatchling** - build system
-
-_This project uses the **FastMCP** framework, which requires less boilerplate than other frameworks (e.g., MCP Python SDK)._
-_See [mcp-server-1](https://github.com/chrisbrickey/mcp-server-1) for examples where functionality is more explicit._
-
-
-### Dependencies for recommender tooling
-- **httpx** - for API calls to TMDB
-- **python-dotenv** - for API key management
-
-
 ## Features
 
 ### Tools
@@ -27,10 +10,42 @@ These tools are callable actions, analogous to POST requests. An agent executes 
 Tools are annotated with `@mcp.tool()` in the FastMCP framework.
 - **list_genres** - Fetches all entertainment genres from TMDB API for movies and TV shows, returning a unified map showing which media types support each genre
 
+_NB: The `@mcp.tool()` decorator wraps the function into a FunctionTool object, which prevents it from being called directly including by tests. The logic of tool methods is extracted to helpers methods, which are covered by unit tests._
+
 ### Resources
 These resources provide read-only data, analogous to GET requests. An agent reads the information but does not performa actions. 
 Resources are annotated with `@mcp.resource()` in the FastMCP framework.
 - **config://version** - Get server version
+
+### Contexts
+Context-aware tools use FastMCP's `Context` parameter to access advanced MCP features like LLM sampling.
+
+- **list_genres_simplified** - Returns a simplified list of genre names by using `ctx.sample()` to leverage the agent's LLM capabilities for data transformation - it asks the current client's LLM to reformat the data. If sampling is not supported by the current client, then the method falls back to direct extraction of genres using python code.
+
+#### How It Works
+
+```
+Agent → list_genres_simplified(ctx)
+      → fetch_genres() [gets full structured data]
+      → ctx.sample() [asks agent to simplify it]
+      → Returns clean, sorted list to agent
+```
+
+#### Client Support
+
+Sampling requires the MCP client to support callbacks to its LLM, which is a security-sensitive feature:
+- **Claude Desktop**: Does NOT currently support sampling
+- **Claude Code**: Also unlikely to support it currently
+
+#### Use Cases
+
+While using a context to simplify the format of `list_genres` is overkill, the pattern demonstrates agent-to-agent communication useful for:
+- Summarizing large documents
+- Analyzing sentiment
+- Making recommendations based on data
+- Multi-step workflows with decision points
+
+
 
 ## Project Structure
 This project follows the modern Python src/ layout to support convenient packaging and testing.
@@ -62,6 +77,17 @@ src/greenroom/          # python package
 └── utils.py            # shared utilities
 ```
 
+## Dependencies
+
+- **Python 3.12** 
+- **FastMCP >=2.13.0** - MCP server framework; requires Python 3.10+
+- **uv** -  package manager; [installation instructions](https://github.com/astral-sh/uv#installation)
+- **Hatchling** - build system
+- **httpx** - for API calls to TMDB
+- **python-dotenv** - for API key management
+
+_This project uses the **FastMCP** framework, which requires less boilerplate than other frameworks (e.g., MCP Python SDK)._
+_See [mcp-server-1](https://github.com/chrisbrickey/mcp-server-1) for examples where functionality is more explicit._
 
 ## Setup
 
@@ -178,4 +204,4 @@ This might be useful if the configuration is not correct. Removing the server an
 
 ## Future Development
 - Add alternative media types (e.g. podcasts)
-- Add helper agents and coordinate their activity
+- Add helper agents using local LLMs or an additional LLM integration and coordinate the activity of those agents

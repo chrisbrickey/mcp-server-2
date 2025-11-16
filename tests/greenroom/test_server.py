@@ -1,10 +1,20 @@
 """Tests for server.py."""
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
-from greenroom.server import fetch_genres
+from greenroom.server import fetch_genres, simplify_genres
+
+
+# Shared test data for simplify_genres tests
+SAMPLE_GENRES = {
+    "Action": {"id": 28, "has_movies": True, "has_tv_shows": False},
+    "Drama": {"id": 18, "has_movies": True, "has_tv_shows": True},
+    "Mystery": {"id": 9648, "has_movies": False, "has_tv_shows": True},
+}
 
 
 def test_fetch_genres_combines_media_types(monkeypatch, httpx_mock: HTTPXMock):
@@ -201,3 +211,53 @@ def test_fetch_genres_raises_connection_error_on_request_failure(monkeypatch, ht
 
     # Verify the error message mentions connection failure
     assert "Failed to connect to TMDB API" in str(exc_info.value)
+
+
+@pytest.mark.asyncio
+@patch("greenroom.server.fetch_genres")
+async def test_list_genres_simplified_calls_sample_with_correct_prompt(mock_fetch_genres):
+    """Test that simplify_genres calls ctx.sample with the genre data."""
+    mock_fetch_genres.return_value = SAMPLE_GENRES
+
+    # Create mock Context with async sample method
+    mock_ctx, mock_response = MagicMock(), MagicMock()
+    mock_response.text = "Action, Drama, Mystery"
+    mock_ctx.sample = AsyncMock(return_value=mock_response)
+
+    # Call the function
+    result = await simplify_genres(mock_ctx)
+
+    # Verify ctx.sample was called with exact expected arguments
+    mock_ctx.sample.assert_called_once_with(
+        messages=f"Extract just the genre names from this data and return as a simple sorted comma-separated list:\n{SAMPLE_GENRES}",
+        system_prompt="You are a data formatter. Return only a clean, sorted list of genre names, nothing else.",
+        temperature=0.0,
+        max_tokens=500
+    )
+
+    # Verify the result is the response text
+    assert result == "Action, Drama, Mystery"
+
+
+@pytest.mark.asyncio
+@patch("greenroom.server.fetch_genres")
+async def test_list_genres_simplified_falls_back_on_sample_failure(mock_fetch_genres):
+    """Test that simplify_genres falls back to sorted keys when sampling fails."""
+    mock_fetch_genres.return_value = SAMPLE_GENRES
+
+    # Create mock Context where sample raises an exception
+    mock_ctx = MagicMock()
+    mock_ctx.sample = AsyncMock(side_effect=RuntimeError("Sampling not supported"))
+    mock_ctx.warning = AsyncMock()
+
+    # Call the function
+    result = await simplify_genres(mock_ctx)
+
+    # Verify fallback returns sorted genre names
+    assert result == "Action, Drama, Mystery"
+
+    # Verify warning was logged
+    mock_ctx.warning.assert_called_once()
+    warning_msg = mock_ctx.warning.call_args[0][0]
+    assert "Sampling failed" in warning_msg
+    assert "RuntimeError" in warning_msg

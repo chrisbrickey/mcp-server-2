@@ -6,7 +6,7 @@ from typing import Dict, List, Any
 
 import httpx
 from dotenv import load_dotenv
-from fastmcp import FastMCP
+from fastmcp import FastMCP, Context
 from pydantic import BaseModel, ValidationError
 
 # Load environment variables
@@ -65,6 +65,47 @@ def list_genres() -> Dict[str, Any]:
 
     # Delegate to helper function to enable unit testing without FastMCP server setup
     return fetch_genres()
+
+@mcp.tool()
+async def list_genres_simplified(ctx: Context) -> str:
+    """
+    Get a simplified list of available genre names.
+
+    Uses LLM sampling to extract just the genre names from the full genre data,
+    returning a clean, formatted list without IDs or media type flags.
+    Falls back to direct extraction if sampling is not supported.
+
+    Returns:
+        A formatted string containing the sorted list of genre names.
+
+    Raises:
+        Sampling errors are logged and result in fallback to direct key extraction.
+    """
+    # Delegate to helper function to enable unit testing without FastMCP server setup
+    return await simplify_genres(ctx)
+
+async def simplify_genres(ctx: Context) -> str:
+    """
+    Encapsulates the genre simplification logic. See list_genres_simplified() for detailed documentation.
+    """
+    # Fetch the full genre data
+    genres = fetch_genres()
+
+    try:
+        # Use LLM sampling to format the response
+        # Calls the agent again with new prompt to reformat the response before returning it to the user
+        response = await ctx.sample(
+            messages=f"Extract just the genre names from this data and return as a simple sorted comma-separated list:\n{genres}",
+            system_prompt="You are a data formatter. Return only a clean, sorted list of genre names, nothing else.",
+            temperature=0.0,  # Deterministic output
+            max_tokens=500
+        )
+        return response.text
+    except Exception as e:
+        # Catch broad exception because we don't know the specific exception type
+        # raised when sampling is not supported by the client
+        await ctx.warning(f"Sampling failed ({type(e).__name__}: {e}), using fallback")
+        return ", ".join(sorted(genres.keys()))
 
 def fetch_genres() -> Dict[str, Any]:
     """
