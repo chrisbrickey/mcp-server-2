@@ -49,7 +49,22 @@ While using a context to simplify the format of `list_genres` is overkill, the p
 - Making recommendations based on data
 - Multi-step workflows with decision points
 
+### Multiple Agents
+This server includes configuration and tools to use multiple agents to work on a single task. 
 
+- **compare_llm_responses** - Receives a prompt and fields it out to two agents (defaults to Claude and Ollama). It constrains the responses by temperature and token limit.
+
+#### How It Works
+
+```
+To trigger this tool, ask Claude: Using the compare_llm_reponses tool, why is the ocean blue? 
+
+You should see: 
+  Both Claude* and Ollama responses 
+  Response lengths comparison
+  Structured JSON output showing both LLM outputs side-by-side
+```
+_*Generally, Claude's response in this case will be null because we are asking to resample the existing claude agent, which is not permitted by Anthropic._
 
 ## Project Structure
 This project follows the modern Python src/ layout to support convenient packaging and testing.
@@ -76,19 +91,20 @@ src/greenroom/          # python package
 ├── server.py           # primary entry point to server
 ├── tools/              # tools organized into modules
 │   ├── __init__.py
-│   ├── math_tools.py
-│   └── data_tools.py
+│   ├── agent_tools.py
+│   └── media_tools.py
 └── utils.py            # shared utilities
 ```
 
 ## Dependencies
 
-- **Python 3.12** 
+- **Python 3.12**
 - **FastMCP >=2.13.0** - MCP server framework; requires Python 3.10+
 - **uv** -  package manager; [installation instructions](https://github.com/astral-sh/uv#installation)
 - **Hatchling** - build system
 - **httpx** - for API calls to TMDB
 - **python-dotenv** - for API key management
+- **Ollama** (optional) - local LLM runtime for multi-agent tools like compare_llm_responses; [installation instructions](https://ollama.com/download)
 
 _This project uses the **FastMCP** framework, which requires less boilerplate than other frameworks (e.g., MCP Python SDK)._
 _See [mcp-server-1](https://github.com/chrisbrickey/mcp-server-1) for examples where functionality is more explicit._
@@ -111,6 +127,46 @@ uv sync
 - Copy the content of `.env.example` to your new file.
 - Replace `your_tmdb_api_key_here` in .env with the actual TMDB API key.
 
+### (optional) Setup Ollama
+To use Ollama as a second agent (in addition to Claude). An example of usage is the **compare_llm_responses** tool.
+
+1. **Install Ollama**
+```
+# macOS
+brew install ollama
+
+# Or download from https://ollama.com/download
+```
+
+2. **Start Ollama service**
+```
+# macOS (Ollama runs as a background service after installation)
+ollama serve
+
+# Or simply open the Ollama application
+```
+
+3. **Pull the default model**
+```
+# The compare_llm_responses tool defaults to llama3.2:latest
+ollama pull llama3.2
+
+# Verify the model is available
+ollama list
+```
+
+4. **Test Ollama is working**
+```
+ curl http://localhost:11434/api/generate -d '{"model": "llama3.2", "prompt": "Why is the sky blue?", "stream": false}'
+ 
+ # expected response might be something like
+ {
+   "model":"llama3.2",
+   "created_at":"2025-11-30T12:01:32.314915Z",
+   "response":"The sky appears blue because of a phenomenon called Rayleigh scattering...
+   ...
+ }
+```
 
 ## Development
 
