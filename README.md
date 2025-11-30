@@ -60,10 +60,11 @@ This server includes configuration and tools to use multiple agents to work on a
 To trigger this tool, ask Claude: Using the compare_llm_reponses tool, why is the ocean blue? 
 
 You should see: 
-  Both Claude and Ollama responses
+  Both Claude* and Ollama responses 
   Response lengths comparison
   Structured JSON output showing both LLM outputs side-by-side
 ```
+_*Generally, Claude's response in this case will be null because we are asking to resample the existing claude agent, which is not permitted by Anthropic._
 
 ## Project Structure
 This project follows the modern Python src/ layout to support convenient packaging and testing.
