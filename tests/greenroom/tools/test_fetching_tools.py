@@ -8,12 +8,12 @@ from greenroom.tools.fetching_tools import fetch_genres
 
 
 def test_fetch_genres_combines_media_types(monkeypatch, httpx_mock: HTTPXMock):
-    """Test list_genres returns combined movie and TV genres."""
+    """Test list_genres returns combined film and TV genres."""
     # Set up environment
     monkeypatch.setenv("TMDB_API_KEY", "test_api_key")
 
     # Mock TMDB API responses
-    movie_genres = {
+    film_genres = {
         "genres": [
             {"id": 28, "name": "Action"},
             {"id": 18, "name": "Drama"},
@@ -29,7 +29,7 @@ def test_fetch_genres_combines_media_types(monkeypatch, httpx_mock: HTTPXMock):
 
     httpx_mock.add_response(
         url="https://api.themoviedb.org/3/genre/movie/list?api_key=test_api_key",
-        json=movie_genres
+        json=film_genres
     )
     httpx_mock.add_response(
         url="https://api.themoviedb.org/3/genre/tv/list?api_key=test_api_key",
@@ -43,17 +43,17 @@ def test_fetch_genres_combines_media_types(monkeypatch, httpx_mock: HTTPXMock):
     expected = {
         "Drama": {
             "id": 18,
-            "has_movies": True,
+            "has_films": True,
             "has_tv_shows": True
         },
         "Action": {
             "id": 28,
-            "has_movies": True,
+            "has_films": True,
             "has_tv_shows": False
         },
         "Mystery": {
             "id": 9648,
-            "has_movies": False,
+            "has_films": False,
             "has_tv_shows": True
         }
     }
@@ -68,7 +68,7 @@ def test_fetch_genres_drops_incomplete_genre_data(monkeypatch, httpx_mock: HTTPX
     monkeypatch.setenv("TMDB_API_KEY", "test_api_key")
 
     # Mock TMDB API responses with incomplete data
-    movie_genres = {
+    film_genres = {
         "genres": [
             {"id": 28, "name": "Action"},  # Valid
             {"id": 18},  # Missing name - should be dropped
@@ -87,7 +87,7 @@ def test_fetch_genres_drops_incomplete_genre_data(monkeypatch, httpx_mock: HTTPX
 
     httpx_mock.add_response(
         url="https://api.themoviedb.org/3/genre/movie/list?api_key=test_api_key",
-        json=movie_genres
+        json=film_genres
     )
     httpx_mock.add_response(
         url="https://api.themoviedb.org/3/genre/tv/list?api_key=test_api_key",
@@ -101,22 +101,22 @@ def test_fetch_genres_drops_incomplete_genre_data(monkeypatch, httpx_mock: HTTPX
     expected = {
         "Action": {
             "id": 28,
-            "has_movies": True,
+            "has_films": True,
             "has_tv_shows": False
         },
         "Adventure": {
             "id": 12,
-            "has_movies": True,
+            "has_films": True,
             "has_tv_shows": False
         },
         "Drama": {
             "id": 18,
-            "has_movies": False,
+            "has_films": False,
             "has_tv_shows": True
         },
         "Mystery": {
             "id": 9648,
-            "has_movies": False,
+            "has_films": False,
             "has_tv_shows": True
         }
     }
@@ -164,7 +164,7 @@ def test_fetch_genres_raises_runtime_error_on_invalid_json(monkeypatch, httpx_mo
     # Set up environment
     monkeypatch.setenv("TMDB_API_KEY", "test_api_key")
 
-    # Mock TMDB API to return invalid JSON for movie endpoint
+    # Mock TMDB API to return invalid JSON for film endpoint
     # (Both endpoints need to be mocked since fetch_genres calls both)
     httpx_mock.add_response(
         url="https://api.themoviedb.org/3/genre/movie/list?api_key=test_api_key",

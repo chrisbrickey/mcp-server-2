@@ -8,7 +8,7 @@ import httpx
 from fastmcp import FastMCP
 from pydantic import BaseModel, ValidationError
 
-from greenroom.config import GENRE_ID, HAS_MOVIES, HAS_TV_SHOWS
+from greenroom.config import GENRE_ID, HAS_FILMS, HAS_TV_SHOWS
 
 
 # Pydantic model for TMDB genre validation
@@ -26,7 +26,7 @@ def register_fetching_tools(mcp: FastMCP) -> None:
         """
         List all available entertainment genres across media types.
 
-        Fetches genre lists from TMDB API for movies and TV shows, combining them into
+        Fetches genre lists from TMDB API for films and TV shows, combining them into
         a unified map showing which media types support each genre.
 
         Returns:
@@ -34,12 +34,12 @@ def register_fetching_tools(mcp: FastMCP) -> None:
             {
                 "Documentary": {
                     "id": 99,
-                    "has_movies": true,
+                    "has_films": true,
                     "has_tv_shows": true
                 },
                 "Action": {
                     "id": 28,
-                    "has_movies": true,
+                    "has_films": true,
                     "has_tv_shows": false
                 },
                 ...
@@ -71,14 +71,14 @@ def fetch_genres() -> Dict[str, Any]:
     headers = {"accept": "application/json"}
 
     try:
-        # Fetch genres for both movies and TV shows
+        # Fetch genres for both films and TV shows
         with httpx.Client(timeout=10.0) as client:
-            movie_response = client.get(
+            film_response = client.get(
                 f"{base_url}/genre/movie/list",
                 params={"api_key": api_key},
                 headers=headers
             )
-            movie_response.raise_for_status()
+            film_response.raise_for_status()
 
             tv_response = client.get(
                 f"{base_url}/genre/tv/list",
@@ -88,15 +88,15 @@ def fetch_genres() -> Dict[str, Any]:
             tv_response.raise_for_status()
 
 
-        movie_data = movie_response.json().get("genres", [])
+        film_data = film_response.json().get("genres", [])
         tv_data = tv_response.json().get("genres", [])
 
         # Filter out genres with incomplete data (e.g. missing id or name field)
         # This helps to prevent a KeyError when the final data structure is built.
-        movie_genres = _exclude_incomplete_genres(movie_data)
+        film_genres = _exclude_incomplete_genres(film_data)
         tv_genres = _exclude_incomplete_genres(tv_data)
 
-        return _combine_genre_lists(movie_genres, tv_genres)
+        return _combine_genre_lists(film_genres, tv_genres)
 
     except httpx.HTTPStatusError as e:
         raise RuntimeError(
@@ -131,24 +131,24 @@ def _exclude_incomplete_genres(genres_data: List[Dict[str, Any]]) -> List[TMDBGe
     return valid_genres
 
 
-def _combine_genre_lists(movie_genres: List[TMDBGenre], tv_genres: List[TMDBGenre]) -> Dict[str, Any]:
+def _combine_genre_lists(film_genres: List[TMDBGenre], tv_genres: List[TMDBGenre]) -> Dict[str, Any]:
     """
-    Combine movie and TV genre lists into a unified map.
+    Combine film and TV genre lists into a unified map.
 
     Args:
-        movie_genres: List of validated TMDBGenre models for movies
+        film_genres: List of validated TMDBGenre models for films
         tv_genres: List of validated TMDBGenre models for TV shows
 
     Returns:
-        Dictionary mapping genre names to their properties (id, has_movies, has_tv_shows)
+        Dictionary mapping genre names to their properties (id, has_films, has_tv_shows)
     """
     genres_map = {
         genre.name: {
             GENRE_ID: genre.id,
-            HAS_MOVIES: True,
+            HAS_FILMS: True,
             HAS_TV_SHOWS: False
         }
-        for genre in movie_genres
+        for genre in film_genres
     }
 
     for genre in tv_genres:
@@ -157,7 +157,7 @@ def _combine_genre_lists(movie_genres: List[TMDBGenre], tv_genres: List[TMDBGenr
         else:
             genres_map[genre.name] = {
                 GENRE_ID: genre.id,
-                HAS_MOVIES: False,
+                HAS_FILMS: False,
                 HAS_TV_SHOWS: True
             }
 

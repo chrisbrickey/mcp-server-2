@@ -14,9 +14,9 @@ from greenroom.tools.operations_tools import (
 
 # Shared test data for simplify_genres tests
 SAMPLE_GENRES = {
-    "Action": {"id": 28, "has_movies": True, "has_tv_shows": False},
-    "Drama": {"id": 18, "has_movies": True, "has_tv_shows": True},
-    "Mystery": {"id": 9648, "has_movies": False, "has_tv_shows": True},
+    "Action": {"id": 28, "has_films": True, "has_tv_shows": False},
+    "Drama": {"id": 18, "has_films": True, "has_tv_shows": True},
+    "Mystery": {"id": 9648, "has_films": False, "has_tv_shows": True},
 }
 
 
@@ -76,12 +76,12 @@ async def test_categorize_all_genres_groups_genres_by_mood(mock_fetch_genres):
     """Test that categorize_all_genres correctly groups genres using hardcoded mappings."""
     # Mock genre data with known genres from the hardcoded mapping
     mock_fetch_genres.return_value = {
-        "Horror": {"id": 27, "has_movies": True, "has_tv_shows": False},
-        "Comedy": {"id": 35, "has_movies": True, "has_tv_shows": True},
-        "Documentary": {"id": 99, "has_movies": True, "has_tv_shows": True},
-        "Action": {"id": 28, "has_movies": True, "has_tv_shows": False},
-        "Thriller": {"id": 53, "has_movies": True, "has_tv_shows": False},
-        "Family": {"id": 10751, "has_movies": True, "has_tv_shows": False},
+        "Horror": {"id": 27, "has_films": True, "has_tv_shows": False},
+        "Comedy": {"id": 35, "has_films": True, "has_tv_shows": True},
+        "Documentary": {"id": 99, "has_films": True, "has_tv_shows": True},
+        "Action": {"id": 28, "has_films": True, "has_tv_shows": False},
+        "Thriller": {"id": 53, "has_films": True, "has_tv_shows": False},
+        "Family": {"id": 10751, "has_films": True, "has_tv_shows": False},
     }
 
     # Create mock Context (not needed for hardcoded mappings but required by signature)
@@ -183,9 +183,9 @@ async def test_categorize_all_genres_with_unknown_genres_uses_llm(mock_fetch_gen
     """Test that categorize_all_genres uses LLM for all unknown genres."""
     # Mock genre data with genres NOT in GENRE_MOOD_MAP
     mock_fetch_genres.return_value = {
-        "Western": {"id": 37, "has_movies": True, "has_tv_shows": False},
-        "Experimental": {"id": 9999, "has_movies": True, "has_tv_shows": True},
-        "Noir": {"id": 10001, "has_movies": False, "has_tv_shows": True},
+        "Western": {"id": 37, "has_films": True, "has_tv_shows": False},
+        "Experimental": {"id": 9999, "has_films": True, "has_tv_shows": True},
+        "Noir": {"id": 10001, "has_films": False, "has_tv_shows": True},
     }
 
     # Create mock Context with sample returning different moods for each genre
@@ -227,8 +227,8 @@ async def test_categorize_all_genres_falls_back_to_other_when_llm_fails(mock_fet
     """Test that categorize_all_genres places unknown genres in Other when LLM fails."""
     # Mock genre data with genres NOT in GENRE_MOOD_MAP
     mock_fetch_genres.return_value = {
-        "Western": {"id": 37, "has_movies": True, "has_tv_shows": False},
-        "Experimental": {"id": 9999, "has_movies": True, "has_tv_shows": True},
+        "Western": {"id": 37, "has_films": True, "has_tv_shows": False},
+        "Experimental": {"id": 9999, "has_films": True, "has_tv_shows": True},
     }
 
     # Create mock Context where sample raises exception (LLM unavailable)

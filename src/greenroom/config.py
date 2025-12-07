@@ -14,8 +14,8 @@ from typing import Dict, List
 GENRE_ID = "id"
 """Key for the TMDB genre ID in the genre properties dictionary."""
 
-HAS_MOVIES = "has_movies"
-"""Key indicating whether a genre is available for movies."""
+HAS_FILMS = "has_films"
+"""Key indicating whether a genre is available for films."""
 
 HAS_TV_SHOWS = "has_tv_shows"
 """Key indicating whether a genre is available for TV shows."""

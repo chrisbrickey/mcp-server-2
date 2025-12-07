@@ -5,14 +5,14 @@ This server integrates with [TMDB](www.themoviedb.org), a free and community-dri
 
 Example prompts that would trigger the use of multiple MCP tools: 
 - `What kinds of entertainment can you recommend?`
-- `What kinds of serious movies can you recommend?`
+- `What kinds of serious films can you recommend?`
 
 ## Features
 
 ### Tools
 These tools are callable actions, analogous to POST requests. An agent executes these operations which may have side effects.
 Tools are annotated with `@mcp.tool()` in the FastMCP framework.
-- **list_genres** - Fetches all entertainment genres from TMDB API for movies and TV shows, returning a unified map showing which media types support each genre
+- **list_genres** - Fetches all entertainment genres from TMDB API for films and TV shows, returning a unified map showing which media types support each genre
 
 _NB: The `@mcp.tool()` decorator wraps the function into a FunctionTool object, which prevents it from being called directly including by tests. The logic of tool methods is extracted to helpers methods, which are covered by unit tests._
 
