@@ -3,39 +3,55 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Protocol
 
 import httpx
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field, ValidationError
 
 
+class TmdbConfig(Protocol):
+    """Protocol defining the interface for TMDB media type configurations.
+
+    This protocol allows different media types (films, TV shows, etc.) to define
+    their own configuration classes while ensuring they all implement the same interface.
+    """
+    endpoint: str
+    year_param: str
+    title_field: str
+    date_field: str
+    date_sort_prefix: str
+
+
 @dataclass
-class MediaTypeConfig:
-    """Configuration for different TMDB media types."""
-    endpoint: str  # "movie" or "tv"
-    year_param: str  # "primary_release_year" or "first_air_date_year"
-    title_field: str  # "title" or "name"
-    date_field: str  # "release_date" or "first_air_date"
-    date_sort_prefix: str  # "release_date" or "first_air_date"
+class FilmTmdbConfig:
+    """Configuration for TMDB film discovery API.
+
+    Defines film-specific TMDB API parameters and response field names.
+    """
+    endpoint: str = "movie"
+    year_param: str = "primary_release_year"
+    title_field: str = "title"
+    date_field: str = "release_date"
+    date_sort_prefix: str = "release_date"
 
 
-# Media type configurations
-FILM_CONFIG = MediaTypeConfig(
-    endpoint="movie",
-    year_param="primary_release_year",
-    title_field="title",
-    date_field="release_date",
-    date_sort_prefix="release_date"
-)
+@dataclass
+class TvTmdbConfig:
+    """Configuration for TMDB TV show discovery API.
 
-TV_CONFIG = MediaTypeConfig(
-    endpoint="tv",
-    year_param="first_air_date_year",
-    title_field="name",
-    date_field="first_air_date",
-    date_sort_prefix="first_air_date"
-)
+    Defines TV show-specific TMDB API parameters and response field names.
+    """
+    endpoint: str = "tv"
+    year_param: str = "first_air_date_year"
+    title_field: str = "name"
+    date_field: str = "first_air_date"
+    date_sort_prefix: str = "first_air_date"
+
+
+# Create singleton instances
+FILM_CONFIG = FilmTmdbConfig()
+TV_CONFIG = TvTmdbConfig()
 
 
 # Pydantic model for TMDB film validation
@@ -183,7 +199,7 @@ def register_discovery_tools(mcp: FastMCP) -> None:
 
 
 def _discover_media_from_tmdb(
-    media_config: MediaTypeConfig,
+    media_config: TmdbConfig,
     model_class: type[BaseModel],
     genre_id: Optional[int] = None,
     year: Optional[int] = None,
@@ -296,7 +312,7 @@ def _validate_discovery_params(
     sort_by: str,
     page: int,
     max_results: int,
-    media_config: MediaTypeConfig
+    media_config: TmdbConfig
 ) -> None:
     """Validate discovery parameters for any media type.
 
@@ -344,7 +360,7 @@ def _build_discovery_params(
     language: Optional[str],
     sort_by: str,
     page: int,
-    media_config: MediaTypeConfig
+    media_config: TmdbConfig
 ) -> Dict[str, Any]:
     """Build TMDB API query parameters for any media type.
 
@@ -409,7 +425,7 @@ def _format_discovery_response(
     media_items: List[BaseModel],
     raw_data: Dict[str, Any],
     page: int,
-    media_config: MediaTypeConfig
+    media_config: TmdbConfig
 ) -> Dict[str, Any]:
     """Format discovery response for return to user.
 

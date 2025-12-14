@@ -14,6 +14,8 @@ from greenroom.tools.discovery_tools import (
     _format_discovery_response,
     TMDBFilm,
     TMDBTVShow,
+    FilmTmdbConfig,
+    TvTmdbConfig,
     FILM_CONFIG,
     TV_CONFIG,
 )
