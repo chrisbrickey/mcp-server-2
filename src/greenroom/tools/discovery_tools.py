@@ -288,10 +288,10 @@ def discover_films_from_tmdb(
         "results": [
             {
                 "id": int(media.id),
-                "title": media.title,
+                "title": media.title if media.title else None,
                 "release_date": media.date.isoformat() if media.date else None,
                 "vote_average": media.rating,
-                "overview": media.description,
+                "overview": media.description if media.description else None,
                 "genre_ids": media.genre_ids
             }
             for media in media_list.results
@@ -330,10 +330,10 @@ def discover_tv_shows_from_tmdb(
         "results": [
             {
                 "id": int(media.id),
-                "name": media.title,
+                "name": media.title if media.title else None,
                 "first_air_date": media.date.isoformat() if media.date else None,
                 "vote_average": media.rating,
-                "overview": media.description,
+                "overview": media.description if media.description else None,
                 "genre_ids": media.genre_ids
             }
             for media in media_list.results
